@@ -15,6 +15,7 @@ def create_app():
         exempt = (
             'auth.login',
             'auth.logout',
+            'auth.register',
             'static',
         )
         # if you’re not logged in and not on login/logout/static, redirect

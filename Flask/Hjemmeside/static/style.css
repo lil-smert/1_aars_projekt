@@ -1,13 +1,67 @@
 /* in static/style.css */
 #carouselExampleCaptions.carousel {
   /* limit and crop */
-  max-height: 88vh;
+  max-height: 92vh;
   overflow: hidden;
 }
 
 /* ensure images fill and crop nicely */
 #carouselExampleCaptions .carousel-item img {
-  height: 88vh;
+  height: 92vh;
   object-fit: cover;
 }
 
+/* only show on login/register */
+.login-bg {
+  background: url('/static/login.gif') no-repeat center center fixed;
+  background-size: cover;
+}
+
+/* make sure your form sits on top */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* Container around your login/register form */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+
+  /* size and centering */
+  max-width: 400px;
+  /* never wider than 400px */
+  width: 90%;
+  /* but shrink on mobile */
+  margin: 5% auto;
+  /* vertically space from top and center horizontally */
+
+  /* background with lower opacity */
+  background: rgba(255, 255, 255, 0.384);
+  /* white at 60% opacity (tweak the “0.6” to taste) */
+
+  padding: 2rem;
+  /* inner breathing room */
+  border-radius: 0.5rem;
+  /* rounded corners */
+
+  /* center all text inside (headings, labels, placeholders, etc) */
+  text-align: center;
+}
+
+/* Make inputs & buttons fill the container and center their text */
+.content-wrapper input,
+.content-wrapper button {
+  width: 100%;
+  margin: 0.5rem 0;
+  /* vertical gap between fields */
+  text-align: center;
+  /* center the user-typed text */
+}
+
+/* If you have labels you want left-aligned above each field, you can override: */
+.content-wrapper label {
+  display: block;
+  text-align: left;
+  margin-bottom: 0.25rem;
+}
