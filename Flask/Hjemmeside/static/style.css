@@ -1,0 +1,13 @@
+/* in static/style.css */
+#carouselExampleCaptions.carousel {
+  /* limit and crop */
+  max-height: 88vh;
+  overflow: hidden;
+}
+
+/* ensure images fill and crop nicely */
+#carouselExampleCaptions .carousel-item img {
+  height: 88vh;
+  object-fit: cover;
+}
+
