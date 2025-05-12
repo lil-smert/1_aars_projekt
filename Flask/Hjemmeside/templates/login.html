@@ -3,9 +3,9 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="content-wrapper p-4 rounded">
-  <form method="POST" action="{{ url_for('auth.login') }}">
-    <h3 class="text-center">Login</h3>
+<div class="d-flex vh-100 justify-content-center align-items-center">
+  <form method="POST" action="{{ url_for('auth.login') }}" class="p-4 w-100 rounded-0" style="max-width: 400px;">
+    <h3 class="text-center mb-4 fw-bold display-6 text-white">LOGIN</h3>
 
     {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -15,22 +15,15 @@
     {% endif %}
     {% endwith %}
 
-    <div class="mb-3">
-      <label for="email" class="form-label">Email Address</label>
-      <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required>
+    <div class="mb-3 mt-3">
+      <input type="text" class="form-control text-center rounded-0" id="username" name="username" placeholder="Enter Username" required>
     </div>
 
     <div class="mb-3">
-      <label for="firstname" class="form-label">First Name</label>
-      <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Enter first name" required>
+      <input type="password" class="form-control text-center rounded-0" id="password" name="password" placeholder="Enter Password" required>
     </div>
 
-    <div class="mb-3">
-      <label for="password1" class="form-label">Password</label>
-      <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary w-100 rounded-0">LOGIN</button>
   </form>
 </div>
 {% endblock %}
