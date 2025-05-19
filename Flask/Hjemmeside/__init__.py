@@ -17,6 +17,9 @@ def create_app():
             'auth.logout',
             'auth.register',
             'static',
+            'auth.api_login',
+            'auth.receive_data',
+            'auth.send_data' #Ændret til at tillade API login uden login, ellers ville den redirect
         )
         # if you’re not logged in and not on login/logout/static, redirect
         if request.endpoint not in exempt and 'user_email' not in session:

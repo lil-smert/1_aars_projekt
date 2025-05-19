@@ -1,5 +1,6 @@
 import sqlite3
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint('auth', __name__)
 
@@ -43,13 +44,15 @@ def register():
             flash(f"Username '{username}' is already taken.")
             db.close()
             return redirect(url_for('auth.register'))
-        
+
+        hashed_password = generate_password_hash(password)
+
         try:
             db.execute(
                 'INSERT INTO CREDENTIALS '
                 '(EMAIL, FIRSTNAME, LASTNAME, COMPANY, USERNAME, PASSWORD)'
                 'VALUES (?, ?, ?, ?, ?, ?)',
-                (email, firstname, lastname, company, username, password)
+                (email, firstname, lastname, company, username, hashed_password)
             )
             db.commit()
         except sqlite3.IntegrityError:
@@ -65,8 +68,10 @@ def register():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        
         username = request.form['username'].strip()
         pw = request.form['password']
+
 
         db = get_db()
         user = db.execute(
@@ -74,8 +79,8 @@ def login():
             (username,)
         ).fetchone()
         db.close()
-
-        if user and user['PASSWORD'] == pw:
+        #Tjek at brugeren findes og at passwordet er korrekt, fra hash
+        if user and check_password_hash(user['PASSWORD'], pw):
             session['user_email'] = user['EMAIL']
             return redirect(url_for('routes.home'))
         
@@ -87,6 +92,64 @@ def login():
 def logout():
     session.pop('user_email', None)
     return redirect(url_for('routes.home'))
+
+@auth.route('/api/login', methods=['POST']) #Skal læses op på, men det er en API i JSON, spillet sender et POST request til URL'en, i JSON format
+def api_login():
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"status": "error", "message": "Invalid request."}), 400
+    username = data['username'].strip()
+    pw = data['password']
+    
+
+    db = get_db()
+    user = db.execute(
+        "SELECT USERNAME, PASSWORD FROM CREDENTIALS WHERE USERNAME = ?",
+        (username,)
+    ).fetchone()
+    db.close()
+    
+
+    #Tjek at brugeren findes og at passwordet er korrekt, fra hash
+    if user and check_password_hash(user['PASSWORD'], pw): #Tjekker om
+        return jsonify({"status": "success", "username": user['USERNAME']})
+      
+    return jsonify({"status": "error", "message": "Invalid username or password."}), 401
+
+@auth.route('/api/submit', methods=['POST'])
+def receive_data():
+    data = request.get_json()
+    username = data.get('username')
+    level1 = data.get('level_1')
+    level2 = data.get('level_2')
+    level3 = data.get('level_3')
+    level4 = data.get('level_4')
+    db = get_db()
+    user = db.execute("""INSERT OR REPLACE INTO GAME_DATA (USERNAME, LEVEL1, LEVEL2, LEVEL3, LEVEL4) VALUES (?, ?, ?, ?, ?)""",
+        (username, level1, level2, level3, level4)
+    )
+    db.commit()
+    db.close()
+    return jsonify({"status": "success", "message": "Data received successfully."}), 200
+
+@auth.route('/api/get_data', methods=['GET'])
+def send_data():
+    username = request.args.get('username') #modtager brugernavn
+    db = get_db()
+    data = db.execute("SELECT LEVEL1, LEVEL2, LEVEL3, LEVEL4 FROM GAME_DATA WHERE USERNAME = ?", (username,)).fetchone()
+    db.close()
+    if data:
+        return jsonify(
+            {
+                "level_1": data['LEVEL1'],
+                "level_2": data['LEVEL2'],
+                "level_3": data['LEVEL3'],
+                "level_4": data['LEVEL4'],
+                "status": "success"
+            }
+        )
+    else:
+        return jsonify({"status": "error", "message": "No data found."}), 404
 
 @auth.route('/download')
 def download():
