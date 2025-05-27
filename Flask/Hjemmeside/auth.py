@@ -1,9 +1,17 @@
 import sqlite3
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import base64   
+from io import BytesIO
+from dotenv import load_dotenv
+from cryptography.fernet import Fernet
+import os
+from datetime import datetime
 
 auth = Blueprint('auth', __name__)
-
+#TING SOM SKAL ADDES: lave dashboard flot, favicon, login confirmation alert, send e-mail knap til dashboard, sudo + chmod ~/.bashrc, klokkeslæt
 DB_PATH = 'Hjemmeside/Database/credentials.db'
 
 #Liste over godkendte firmaer
@@ -12,12 +20,113 @@ AUTHORIZED_COMPANIES = {
     "Frederiksberg Kommune",
     "Gooner Games Inc",
 }
+#Key er på forhånd genereret, og stored i OS - for at opnå adgang til os skal man være logget ind som sudo, derfor skal man nu køre hjemmesiden som SUDO, brugte chmod
+load_dotenv() 
+key = os.getenv("FERNET_KEY")
+fernet = Fernet(key)
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
     return conn
 
+def clear_database():
+    db = get_db()
+    db.execute("DELETE FROM GAME_DATA")
+    db.execute("DELETE FROM CREDENTIALS")
+    db.commit()
+    db.close()
+
+
+def get_statistik():
+    db = get_db()
+    company = session.get('user_company')
+    if company:
+        data = db.execute(
+            '''
+            SELECT g.*
+              FROM GAME_DATA g
+              JOIN CREDENTIALS c ON g.USERNAME = c.USERNAME
+             WHERE c.COMPANY = ?
+            ''',
+            (company,)
+        ).fetchall()
+    else:
+        data = db.execute("SELECT * FROM GAME_DATA").fetchall()
+    db.close()
+    return data
+
+def samlet_statistik():
+    rows = get_statistik()  
+    users_completed = 0
+    print(rows)
+    
+    # Laver dem om til lister
+    users   = [r["USERNAME"] for r in rows]
+    lvl1    = [r["LEVEL1"]   for r in rows]
+    lvl2    = [r["LEVEL2"]   for r in rows]
+    lvl3    = [r["LEVEL3"]   for r in rows]
+    lvl4    = [r["LEVEL4"]   for r in rows]
+   #matematikken bag procent
+    for r in rows:
+        if sum([r["LEVEL1"], r["LEVEL2"], r["LEVEL3"], r["LEVEL4"]]) == 4:
+            users_completed +=1
+
+    #Tjekker hvor mange rows der er = brugere
+    total_possible = len(rows) 
+    total_not_done = total_possible - users_completed
+
+    fig = Figure()
+    ax  = fig.subplots()
+    fig.subplots_adjust(bottom=0.3)
+  
+    labels = 'Gennemført', 'Ikke gennemført'
+    sizes = [users_completed, total_not_done]
+
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+    buf = BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight")
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return data
+def bruger_statistik():
+    # Sammenligner username fra game_data med credentials, indsnævrer efter brugerens firma
+    company = session.get('user_company')
+    sql = '''
+    SELECT game_data.username, credentials.FIRSTNAME, credentials.LASTNAME,
+           LEVEL1, LEVEL2, LEVEL3, LEVEL4, ACTIVITY
+    FROM game_data
+    JOIN credentials ON game_data.username = credentials.username
+    WHERE credentials.COMPANY = ?;
+    '''
+    db = get_db()
+    rows = db.execute(sql, (company,)).fetchall()
+    db.close()
+    user_stats = []
+    for row in rows:
+        decrypted_firstname = fernet.decrypt(row["FIRSTNAME"]).decode()
+        decrypted_lastname = fernet.decrypt(row["LASTNAME"]).decode()
+        levels_completed = sum([row["LEVEL1"], row["LEVEL2"], row["LEVEL3"], row["LEVEL4"]])
+        user_stats.append({
+            "firstname": decrypted_firstname,
+            "lastname": decrypted_lastname,
+            "levels_completed": levels_completed,
+            "percentage": int(levels_completed / 4 * 100),
+            "activity": row["ACTIVITY"]
+        })
+    return user_stats 
+
+def navn_join():
+    query = """
+    SELECT game_data.username, credentials.FIRSTNAME, credentials.LASTNAME, credentials.COMPANY
+    FROM game_data
+    JOIN credentials ON game_data.username = credentials.username;
+    """
+    db = get_db()
+    data = db.execute(query).fetchall()
+    db.close()
+    return data
+    
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -28,7 +137,7 @@ def register():
         username = request.form['username'].strip()
         password = request.form['password']
 
-
+        
         #Hvis firmaet ikke er i listen over godkendte firmaer
         if company not in AUTHORIZED_COMPANIES:
             flash('Sorry, "%s" is not authorized to register for our services.' % company)
@@ -45,14 +154,24 @@ def register():
             db.close()
             return redirect(url_for('auth.register'))
 
-        hashed_password = generate_password_hash(password)
 
+        #Kryptering
+        encoded_email = email.encode()
+        encoded_fornavn = firstname.encode()
+        encoded_efternavn = lastname.encode()
+
+        encrypted_fornavn = fernet.encrypt(encoded_fornavn)
+        encrypted_efternavn = fernet.encrypt(encoded_efternavn)
+        encrypted_email = fernet.encrypt(encoded_email)
+        #Hashing
+        hashed_password = generate_password_hash(password)
+        
         try:
             db.execute(
                 'INSERT INTO CREDENTIALS '
                 '(EMAIL, FIRSTNAME, LASTNAME, COMPANY, USERNAME, PASSWORD)'
                 'VALUES (?, ?, ?, ?, ?, ?)',
-                (email, firstname, lastname, company, username, hashed_password)
+                (encrypted_email, encrypted_fornavn, encrypted_efternavn, company, username, hashed_password)
             )
             db.commit()
         except sqlite3.IntegrityError:
@@ -74,14 +193,20 @@ def login():
 
 
         db = get_db()
+        
         user = db.execute(
-            "SELECT EMAIL, PASSWORD FROM CREDENTIALS WHERE USERNAME = ?",
+            "SELECT EMAIL, PASSWORD, COMPANY, ADMIN FROM CREDENTIALS WHERE USERNAME = ?",
             (username,)
         ).fetchone()
         db.close()
         #Tjek at brugeren findes og at passwordet er korrekt, fra hash
+        session_company = user['COMPANY']
+        session_admin = user['ADMIN']
+        
         if user and check_password_hash(user['PASSWORD'], pw):
             session['user_email'] = user['EMAIL']
+            session['user_company'] = user['COMPANY'] 
+            session['user_admin'] = user['ADMIN'] # store company in session
             return redirect(url_for('routes.home'))
         
         flash('Invalid email, firstname or password.')
@@ -91,6 +216,7 @@ def login():
 @auth.route('/logout')
 def logout():
     session.pop('user_email', None)
+    session.pop('user_company', None)
     return redirect(url_for('routes.home'))
 
 @auth.route('/api/login', methods=['POST']) #Skal læses op på, men det er en API i JSON, spillet sender et POST request til URL'en, i JSON format
@@ -119,14 +245,15 @@ def api_login():
 @auth.route('/api/submit', methods=['POST'])
 def receive_data():
     data = request.get_json()
+    activity = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     username = data.get('username')
     level1 = data.get('level_1')
     level2 = data.get('level_2')
     level3 = data.get('level_3')
     level4 = data.get('level_4')
     db = get_db()
-    user = db.execute("""INSERT OR REPLACE INTO GAME_DATA (USERNAME, LEVEL1, LEVEL2, LEVEL3, LEVEL4) VALUES (?, ?, ?, ?, ?)""",
-        (username, level1, level2, level3, level4)
+    user = db.execute("""INSERT OR REPLACE INTO GAME_DATA (USERNAME, LEVEL1, LEVEL2, LEVEL3, LEVEL4, ACTIVITY) VALUES (?, ?, ?, ?, ?, ?)""",
+        (username, level1, level2, level3, level4, activity)
     )
     db.commit()
     db.close()
@@ -161,4 +288,16 @@ def about_us():
 
 @auth.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    if session['user_admin'] == 0:
+        flash('')
+        return redirect(url_for('routes.home'))
+        
+    plot_png = samlet_statistik()
+    user_stats = bruger_statistik()
+    all_users = alle_brugere()
+    
+    return render_template('dashboard.html', plot_png=plot_png, user_stats=user_stats, all_users=all_users)
+
+def alle_brugere():
+    rows = get_statistik()
+    return len(rows)
