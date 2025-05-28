@@ -1,4 +1,5 @@
 import pygame
+import sys
 import random
 from asset import Asset
 from settings import *
@@ -32,7 +33,6 @@ class Trigger:
         self.ready = not self.done and player_rect.colliderect(self.rect)
 
     def trigger(self):
-        self.done = True
         self.ready = False
         
         if self.shared_options:
@@ -87,6 +87,14 @@ class Player:
 class Level:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
+
+        self.level_music = 'assets/music/level.mp3'
+        self.event_music = 'assets/music/encounter.mp3'
+        pygame.mixer.music.load(self.level_music)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+
         pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.display_surface = pygame.display.get_surface()
         self.asset = Asset(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -94,16 +102,24 @@ class Level:
 
         self.bg_surf = pygame.image.load('assets/pictures/office.png').convert()
         self.lost_surf = pygame.image.load('assets/pictures/you_lost.png').convert()
+        self.won_surf = pygame.image.load('assets/pictures/you_win.png').convert()
 
         self.lives = 3
         self.heart_surf = pygame.image.load('assets/pictures/heart.png').convert_alpha()
         self.heart_rect = self.heart_surf.get_rect()
+
+        self.win = False
 
         self.initial_options = [
             ('assets/pictures/event/event_1.png', False),
             ('assets/pictures/event/event_2.png', False),
             ('assets/pictures/event/event_3.png', True),
             ('assets/pictures/event/event_4.png', True),
+            ('assets/pictures/event/event_5.png', False),
+            ('assets/pictures/event/event_6.png', False),
+            ('assets/pictures/event/event_7.png', True),
+            ('assets/pictures/event/event_8.png', True),
+            ('assets/pictures/event/event_9.png', True),
         ]
         self.picture_options = self.initial_options.copy()
 
@@ -134,10 +150,10 @@ class Level:
         self.game_over = False
         self.space_was_down = False
 
-        self.btn_correct = pygame.Rect(200, 600, 150, 50)
-        self.btn_incorrect = pygame.Rect(930, 600, 150, 50)
-        self.btn_retry = pygame.Rect(490, 450, 150, 50)
-        self.btn_exit = pygame.Rect(640, 450, 150, 50)
+        self.btn_correct = pygame.Rect(200, 600, 230, 50)
+        self.btn_incorrect = pygame.Rect(930, 600, 260, 50)
+        self.btn_retry = pygame.Rect(535, 500, 200, 50)
+        self.btn_exit = pygame.Rect(535, 600, 200, 50)
 
     def draw_hearts(self):
         for i in range(self.lives):
@@ -147,14 +163,19 @@ class Level:
 
     def reset_game(self):
         self.lives = 3
-        self.pictures_pool = self.initial_options.copy()
+        self.picture_options = self.initial_options.copy()
         for trig in self.triggers:
+            trig.shared_options = self.picture_options
             trig.done = False
             trig.ready = False
             trig.selected = None
+
         self.in_event = False
         self.active_event = None
         self.game_over = False
+        self.win = False
+        self.player.rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+        self.camera_offset = vector(0, 0)
 
     def run(self):
         dt = self.clock.tick(60)
@@ -170,18 +191,33 @@ class Level:
                     elif self.btn_exit.collidepoint(mx, my):
                         pygame.quit(); sys.exit()
                 
+                elif self.win:
+                    if self.btn_retry.collidepoint(mx, my):
+                        self.reset_game()
+                    elif self.btn_exit.collidepoint(mx, my):
+                        pygame.quit(); sys.exit()
+                    
                 elif self.in_event and self.active_event and self.active_event.selected:
-                    _, is_correct = self.active_event.selected
-                    if self.btn_correct.collidepoint(mx, my):
-                        if not is_correct: self.lives = max(0, self.lives - 1)
+                    choice = None
+                    if self.btn_correct.collidepoint(mx, my): choice = True
+                    elif self.btn_incorrect.collidepoint(mx, my): choice = False
+
+                    if choice is not None:
+                        _, is_correct = self.active_event.selected
+
+                        if choice != is_correct:
+                            self.lives = max(0, self.lives - 1)
+                        self.active_event.done = True
+
+                        if all(t.done for t in self.triggers) and self.lives > 0:
+                            self.win = True
+                        
+                        pygame.mixer.music.fadeout(500)
+                        pygame.mixer.music.load(self.level_music)
+                        pygame.mixer.music.play(-1)
                         self.in_event = False
-                        self.active_event.done = False
                         self.active_event.selected = None
-                    elif self.btn_incorrect.collidepoint(mx, my):
-                        if is_correct: self.lives = max(0, self.lives - 1)
-                        self.in_event = False
-                        self.active_event.done = False
-                        self.active_event.selected = None
+                        self.active_event = None
                         
         if self.lives <= 0:
             self.game_over = True
@@ -189,7 +225,19 @@ class Level:
         if self.game_over:
             self.display_surface.blit(self.lost_surf, (0, 0))
             pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_retry, border_radius = 5)
-            pygame.draw.rect(self.display_surface, (200, 0, 0), self.btn_exit, border_radius = 5)
+            pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_exit, border_radius = 5)
+            font = pygame.font.Font('assets/font/Daydream.ttf', 30)
+            txt_r = font.render('RETRY', True, (255, 255, 255))
+            txt_e = font.render('EXIT', True, (255, 255, 255))
+            self.display_surface.blit(txt_r, txt_r.get_rect(center = self.btn_retry.center))
+            self.display_surface.blit(txt_e, txt_e.get_rect(center = self.btn_exit.center))
+            pygame.display.update()
+            return
+        
+        if self.win:
+            self.display_surface.blit(self.won_surf, (0, 0))
+            pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_retry, border_radius = 5)
+            pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_exit, border_radius = 5)
             font = pygame.font.Font('assets/font/Daydream.ttf', 30)
             txt_r = font.render('RETRY', True, (255, 255, 255))
             txt_e = font.render('EXIT', True, (255, 255, 255))
@@ -223,8 +271,8 @@ class Level:
             pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_correct, border_radius = 10)
             pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_incorrect, border_radius = 10)
             font = pygame.font.Font('assets/font/Daydream.ttf', 30)
-            txt_c = font.render('CORRECT', True, (255, 255, 255))
-            txt_i = font.render('INCORRECT', True, (255, 255, 255))
+            txt_c = font.render('LOVLIGT', True, (255, 255, 255))
+            txt_i = font.render('ANDHOLDT', True, (255, 255, 255))
             self.display_surface.blit(txt_c, txt_c.get_rect(center = self.btn_correct.center))
             self.display_surface.blit(txt_i, txt_i.get_rect(center = self.btn_incorrect.center))
 
@@ -254,6 +302,9 @@ class Level:
                         trig.trigger()
                         self.in_event = True
                         self.active_event = trig
+                        pygame.mixer.music.fadeout(500)
+                        pygame.mixer.music.load(self.event_music)
+                        pygame.mixer.music.play(-1)
                         break
 
         self.draw_hearts()
