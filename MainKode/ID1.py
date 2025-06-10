@@ -11,14 +11,14 @@ class gamer:
         self.run = True
         self.screen = pygame.display.set_mode((1280, 720))
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.screen.get_size()
-        self.font = pygame.font.Font("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/font/KGPerfectPenmanship.ttf", 35)
+        self.font = pygame.font.Font("assets/font/KGPerfectPenmanship.ttf", 35)
         self.mail_choice = False
         self.correct_guesses = 0
         self.incorrect_guesses = 0
         self.hover = (154, 189, 220)
         self.correct_sound = pygame.mixer.Sound("sounds/erwinyes.mp3")
         self.incorrect_sound = pygame.mixer.Sound("sounds/hell-naw-dog.mp3")
-        self.background_music = pygame.mixer.music.load("sounds/background_music.mp3")
+        self.background_music = pygame.mixer.music.load("sounds/phishing_music.mp3")
 
         self.retry_button = Button(None, 
                               pos=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2.3), 
@@ -167,7 +167,6 @@ class gamer:
 }
 
     def setup_round(self):
-        self.background_music = pygame.mixer.music.set_volume(0.1)
         self.background_music = pygame.mixer.music.play(-1)
         self.timer_start = pygame.time.get_ticks()
         self.mail_buttons.clear()
@@ -309,6 +308,7 @@ class gamer:
                             self.incorrect_guesses = 0
                             game_state = "play"
                         elif self.main_menu_button.checkForInput(pygame.mouse.get_pos()):
+                            pygame.mixer.music.unload()
                             self.run = False
 
             if game_state == "play":

@@ -11,28 +11,28 @@ import random
 pygame.init()
 asset = Asset(1280, 720) # Vi laver en instans af asset klassen, som er vores baggrund
 screen = pygame.display.set_mode((1280, 720), pygame.FULLSCREEN) # Vi laver et vindue til vores spil
-pygame.mixer.music.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/music/menu.mp3") # Vi importerer musikken til menuen # Bliver afspillet i starten
-menu_snd = pygame.mixer.Sound("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/music/menusnd.mp3")
-menu_play_snd = pygame.mixer.Sound("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/music/menu_play.mp3")
+pygame.mixer.music.load("assets/music/menu.mp3") # Vi importerer musikken til menuen # Bliver afspillet i starten
+menu_snd = pygame.mixer.Sound("assets/music/menusnd.mp3")
+menu_play_snd = pygame.mixer.Sound("assets/music/menu_play.mp3")
 clock = pygame.time.Clock()
 login = login.Login()
-frames = [pygame.image.load(f"c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/sprites/background/menu_animation/background_{i}.gif") for i in range(20)]
-background = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/sprites/background/menu_animation/background_0.gif") # Vi importerer baggrunden til menuen
-play_img = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/play_btn.png")
-play_img2 = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/play_btn2.png")
-options_img1 = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/options_1.png")
-options_img2 = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/options_2.png")
-exit_img1 = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/exit_1.png") # Vi importerer billederne til knapperne
-exit_img2 = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/exit_2.png")
+frames = [pygame.image.load(f"assets/pictures/sprites/background/menu_animation/background_{i}.gif") for i in range(20)]
+background = pygame.image.load("assets/pictures/sprites/background/menu_animation/background_0.gif") # Vi importerer baggrunden til menuen
+play_img = pygame.image.load("assets/pictures/play_btn.png")
+play_img2 = pygame.image.load("assets/pictures/play_btn2.png")
+options_img1 = pygame.image.load("assets/pictures/options_1.png")
+options_img2 = pygame.image.load("assets/pictures/options_2.png")
+exit_img1 = pygame.image.load("assets/pictures/exit_1.png") # Vi importerer billederne til knapperne
+exit_img2 = pygame.image.load("assets/pictures/exit_2.png")
 pygame.display.set_caption("Main Menu")
-font = "c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/font/menufont.otf"
+font = "assets/font/menufont.otf"
 
 def get_font(size):  # Vi importerer fontenlogi, og "size" er størrelsen på fonten, som vi så definerer senere
-    return pygame.font.Font("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/font/menufont.otf", size)
+    return pygame.font.Font("assets/font/menufont.otf", size)
 play_button = Button(image=play_img, pos=(225, 600), text_input="", font=get_font(100), base_color="#d7fcd4", hovering_color="White", hovering_image=play_img2)
 options_button = Button(image=options_img1, pos=(650, 600), text_input="", font=get_font(100), base_color="#d7fcd4", hovering_color="White", hovering_image=options_img2) # Vi laver en knap til options menuen
 exit_button = Button(image=exit_img1, pos=(1075, 600), text_input="", font=get_font(100), base_color="#d7fcd4", hovering_color="White", hovering_image=exit_img2) #
-fact_img = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/fact.png") # Vi importerer billedet til facts knappen
+fact_img = pygame.image.load("assets/pictures/fact.png") # Vi importerer billedet til facts knappen
 fact_rect = fact_img.get_rect(center=(625, 250)) # Vi laver en rektangel til facts knappen
 pygame.display.flip() # Vi opdaterer skærmen
 
@@ -111,7 +111,7 @@ def main_menu(): # Vi spiller musikken i loop
             fact_ready = True
             
         if fact_ready:
-            asset.font(current_fact, "c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/font/menufont.otf", 
+            asset.font(current_fact, "assets/font/menufont.otf", 
                       26, 175, 225, (0,0,0))
         
         

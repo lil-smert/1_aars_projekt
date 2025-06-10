@@ -279,7 +279,7 @@ class Level:
             pygame.draw.rect(self.display_surface, (0, 200, 0), self.btn_incorrect, border_radius = 10)
             font = pygame.font.Font('assets/font/Daydream.ttf', 30)
             txt_c = font.render('LOVLIGT', True, (255, 255, 255))
-            txt_i = font.render('ANDHOLDT', True, (255, 255, 255))
+            txt_i = font.render('ANHOLDT', True, (255, 255, 255))
             self.display_surface.blit(txt_c, txt_c.get_rect(center = self.btn_correct.center))
             self.display_surface.blit(txt_i, txt_i.get_rect(center = self.btn_incorrect.center))
 

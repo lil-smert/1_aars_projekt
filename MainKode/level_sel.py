@@ -16,8 +16,8 @@ class Levels:
         self.running = True
         self.clear_color = (0, 0, 0)
         self.keys = pygame.key.get_pressed()
-        self.font = pygame.font.Font("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/font/menufont.otf", 30)
-        self.font1 = "c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/font/menufont.otf"
+        self.font = pygame.font.Font("assets/font/menufont.otf", 30)
+        self.font1 = "assets/font/menufont.otf"
         self.press_space = self.font.render("Tryk SPACE", True, (255, 255, 255))
         self.asset = Asset()
     
@@ -43,7 +43,7 @@ class Levels:
 
 
     def level_1(self):
-        pygame.mixer.music.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/music/phishing_1.mp3")
+        pygame.mixer.music.load("assets/music/phishing_1.mp3")
         pygame.mixer.music.play() 
         self.current_level = 1
         self.level_1_game = gamer()
@@ -51,7 +51,7 @@ class Levels:
         self.screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Phishing Level")
         self.screen.fill(self.clear_color)  # Clear screen first
-        self.phishing_img = pygame.image.load("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/phishing.png")
+        self.phishing_img = pygame.image.load("assets/pictures/phishing.png")
         self.phishing_img_rect = self.phishing_img.get_rect(center=(640, 160))
         self.info_text_1 = self.font.render("Phishing er en type cyberangreb, hvor svindlere forsøger at narre dig til at", True, (255, 255, 255))
         self.info_text_2 = self.font.render("afsløre personlige oplysninger som adgangskoder, kontooplysninger", True, (255, 255, 255))
@@ -103,7 +103,7 @@ class Levels:
             self.run_level()
             self.screen.fill(self.clear_color)
             self.screen.blit(self.press_space, (520, 650))
-            self.asset.img("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/gdpr.png", 640, 160, self.screen)
+            self.asset.img("assets/pictures/gdpr.png", 640, 160, self.screen)
             if self.level_2_scene == 0:
                 self.screen.blit(self.gdpr_text_1, (40, 340))
                 self.screen.blit(self.gdpr_text_2, (40, 400))
@@ -140,7 +140,7 @@ class Levels:
         while self.running:
             self.run_level()
             self.screen.fill(self.clear_color)
-            self.asset.img("c:/Users/vikto/Desktop/KEA/Projekt/Pygame/assets/pictures/password.png", 640, 160, self.screen)
+            self.asset.img("assets/pictures/password.png", 640, 160, self.screen)
             self.screen.blit(self.press_space, (520, 650))
             if self.level_3_scene == 0:
                 self.screen.blit(self.password_text_1, (40, 340))
@@ -165,14 +165,39 @@ class Levels:
     def level_4(self):
         self.current_level = 4
         self.level_4_scene = 0
-        self.level_4_game = Game()
+        self.level_4_text_1 = self.font.render("Sikker surfing er en vigtig del af at beskytte dig selv og din arbejdsplads", True, (255, 255, 255))
+        self.level_4_text_2 = self.font.render("mod cybertrusler. Det handler om at være opmærksom på, hvilke hjemmesider", True, (255, 255, 255))
+        self.level_4_text_3 = self.font.render("du besøger, samt hvilke oplysninger du deler online. Det kan nemlig have", True, (255, 255, 255))
+        self.level_4_text_4 = self.font.render("konsekvenser for både dig og din arbejdsplads, hvis du ikke er opmærksom.", True, (255, 255, 255))
+        self.level_4_text_5 = self.font.render("I denne bane skal du vurdere hvorvidt medarbejderne er inde på hjemmesider", True, (255, 255, 255))
+        self.level_4_text_6 = self.font.render("som ser mistænkelige ud, ikke er relevante eller potientielt indeholder virus ", True, (255, 255, 255))
+        self.level_4_text_7 = self.font.render("eller malware. Du skal godkende de hjemmesider, som du mener er sikre.", True, (255, 255, 255))
+        self.level_4_text_8 = self.font.render("Du bevæger dig ved hjælp af piltasterne", True, (255, 255, 255))
         self.screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Sikker Surfing")
         self.screen.fill(self.clear_color)
         while self.running:
-            running = self.level_4_game.run()
-            # exit button in minigame sets running False
-            if not running:
+            self.run_level()
+            self.screen.fill(self.clear_color)
+            self.asset.img("assets/pictures/sikkersurfing.png", 640, 160, self.screen)
+            if self.level_4_scene == 0:
+                self.screen.blit(self.level_4_text_1, (40, 340))
+                self.screen.blit(self.level_4_text_2, (40, 400))
+                self.screen.blit(self.level_4_text_3, (40, 460))
+                self.screen.blit(self.level_4_text_4, (40, 520))
+            if self.level_4_scene == 1:
+                self.screen.blit(self.level_4_text_5, (40, 340))
+                self.screen.blit(self.level_4_text_6, (40, 400))
+                self.screen.blit(self.level_4_text_7, (40, 460))
+                self.screen.blit(self.level_4_text_8, (40, 520))
+            if self.level_4_scene == 2:
+                self.level_4_game = Game()
+                self.level_4_game.game_run()
                 self.running = False
-                break
+                
+            pygame.display.flip()
+            self.clock.tick(60)
+            
+            # exit button in minigame sets running False
+           
 
