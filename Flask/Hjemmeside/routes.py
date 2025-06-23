@@ -4,7 +4,7 @@ routes = Blueprint('routes', __name__)
 
 @routes.route('/')
 def home():
-    # Har ændret så når man anmoder med API, så redirecter den ikke til login, da den eller ikke virkede.
+    
     if 'user_email' not in session:
         if request.accept_mimetypes['application/json']:
             return jsonify({"status": "error", "message": "Unauthorized"}), 401
