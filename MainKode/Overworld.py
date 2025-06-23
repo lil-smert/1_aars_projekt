@@ -1,18 +1,15 @@
 import pygame
 from overworld_player import Player
-from overworld_sprite import sprites, Sprite
-from button import Button
+from overworld_sprite import sprites
 from level_sel import Levels
 from asset import Asset
 import requests
 import os 
 from complete import complete
 
-# Animationer til player, lyd til tekst skærme
 class Overworld:
     def __init__(self):
-        pygame.init()   
-        pygame.display.set_caption("Overworld")
+        pygame.init()
         self.asset = Asset(1280, 720)
         self.screen = pygame.display.set_mode((1280, 720))
         self.clock = pygame.time.Clock()
@@ -25,17 +22,13 @@ class Overworld:
         self.level_4_collision = False  
         self.data_sent = False
         self.user_data = {
-            "username" : os.environ.get("USERNAME", ""), #Brugernavnet fra login skærmdddddd
-            "level_1" : 1,
-            "level_2" : 1,
-            "level_3" : 1,
-            "level_4" : 1
+            "username" : os.environ.get("USERNAME", ""), 
+            "level_1" : 0,
+            "level_2" : 0,
+            "level_3" : 0,
+            "level_4" : 0
         }
-        pygame.mixer.music.play(-1)  # Play background music on loop
-
-        
-       
-        
+        pygame.mixer.music.play(-1) 
 
     def game_assets(self):
         sprites.clear() 
@@ -69,14 +62,14 @@ class Overworld:
         self.final_text_rect = self.final_text.get_rect(center=(640, 680))
         self.space_text = self.font.render("Tryk SPACE", True, (255, 255, 255))
         self.space_text_rect = self.space_text.get_rect(center=(640, 680))
-        #Colission
+
         self.overworld_col = pygame.Rect(0,0, 1280, 125)
         self.overworld_col_1 = pygame.Rect(0,650, 1280, 200)
         self.overworld_col_2 = pygame.Rect(1000, 550, 200, 200)
         self.overworld_col_3 = pygame.Rect(1250, 0, 100, 720)
         self.overworld_col_4 = pygame.Rect(-200, 0, 100, 720)
         self.level_1_rect = self.level_1.get_rect(center=(370, 390))
-        self.level_1_col = self.level_1_rect.inflate(30, -150)  # Inflate the rect by 20 pixels in both directions
+        self.level_1_col = self.level_1_rect.inflate(30, -150)  
         self.game_map_rect = self.game_map.get_rect(topleft=(0,0)) 
         self.level2_col = pygame.Rect(475, 400, 175, 175)
         self.level3_col = pygame.Rect(825, 400, 150, 150)
@@ -84,7 +77,6 @@ class Overworld:
         self.back_snd = pygame.mixer.Sound("assets/music/back_snd.mp3")
         self.frames_map = [pygame.image.load(f"assets/pictures/sprites/background/overworld_animation/map_{i}.png") for i in range(2)]
         self.end = False
-
         pygame.display.flip()
 
     def user_progress(self):
@@ -145,7 +137,7 @@ class Overworld:
             self.level_4_collision = True
             if keys[pygame.K_SPACE]:
                 if self.boss_open < 3:
-                    self.boss_channel.play(self.boss_closed) #bug når man bevæger sig imens den spiller
+                    self.boss_channel.play(self.boss_closed)
                 if self.boss_open == 3:
                     pygame.mixer.music.unload()
                     pygame.mixer.Channel(0).stop()
@@ -177,14 +169,14 @@ class Overworld:
       
 
     def draw(self):
-        self.screen.fill(self.clear_color)  # Clear screen first
+        self.screen.fill(self.clear_color)
         self.current = self.frames_map[self.frame_index]
         self.screen.blit(self.current, (0, 0))
         pygame.draw.rect(self.game_map, (0,0,0), self.overworld_col)
         pygame.draw.rect(self.game_map, (0,0,0), self.overworld_col_1)
         pygame.draw.rect(self.game_map, (0,0,0), self.overworld_col_2)
         pygame.draw.rect(self.game_map, (0,0,0), self.overworld_col_3)
-        pygame.draw.rect(self.game_map, (0,0,0), self.overworld_col_4)  # Draw the overworld collision rect
+        pygame.draw.rect(self.game_map, (0,0,0), self.overworld_col_4)
         pygame.draw.rect(self.game_map, (0,0,0), self.level2_col)
         pygame.draw.rect(self.game_map, (0,0,0), self.level3_col)  
         pygame.draw.rect(self.game_map, (0,0,0), self.level4_col)
@@ -222,7 +214,7 @@ class Overworld:
                 self.screen.blit(self.space_text, self.space_text_rect)
             else:
                 self.screen.blit(self.final_text, self.final_text_rect)
-        for s in sprites:  # Draw all sprites
+        for s in sprites: 
             s.draw(self.screen)
         if self.end == True:
             self.screen.blit(self.end_screen_img, (0, 0))
@@ -235,19 +227,15 @@ class Overworld:
         pygame.mixer.music.play(-1)
         
         
-        # Check for collision with other sprites if needed
     def run(self):
         self.load_data()
         self.running = True
         self.frame_index = 0
         self.frame_delay = 35
-        self.frame_counter = 0  # Play background music 
+        self.frame_counter = 0  
         frame_counter = 0 
         while self.running:
-            
-
             self.boss_open = self.user_data["level_1"] + self.user_data["level_2"] + self.user_data["level_3"]
-            # update unlocked levels based on complete flags
             self.user_progress()
             
             if pygame.mixer.music.get_busy() == False:
@@ -263,33 +251,22 @@ class Overworld:
             self.mouse_pos = pygame.mouse.get_pos()
             self.collision_detection()
             
-            
-        # 1. Kigger efter events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.running = False
-        
-        # 2. Tjekker for input
             self.player.update()
             if self.overworld_col.colliderect(self.player_rect) or self.overworld_col_1.colliderect(self.player_rect) or self.overworld_col_2.colliderect(self.player_rect) or self.overworld_col_3.colliderect(self.player_rect) or self.overworld_col_4.colliderect(self.player_rect):
                 self.player.x = self.player.old_x
                 self.player.y = self.player.old_y
-                
-        # 3. Draw everything
             self.draw()
             if not complete.all_complete and self.user_data["level_4"] == 1:
                 pygame.mixer.Channel(5).play(self.completed_snd)
                 self.end_screen()
                 complete.all_complete = True
                 self.end = True
-                
-           
-            
-        
-        # 4. Update display once per frame
             pygame.display.flip()
             self.clock.tick(60)
             frame_counter += 1

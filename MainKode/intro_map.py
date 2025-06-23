@@ -5,8 +5,6 @@ from Overworld import Overworld
 from button import Button
 from asset1 import Asset
 
-#Bevægelses guide
-
 class map_intro:
     def __init__(self):
         pygame.init()
@@ -39,30 +37,25 @@ class map_intro:
                 
     def draw(self):
         pygame.draw.rect(self.screen, (0,0,0), self.menu_rect)
-        self.screen.fill(self.clear_color)  # Clear screen first
+        self.screen.fill(self.clear_color) 
         self.screen.blit(self.game_map, self.game_map_rect)
-        self.screen.blit(self.wasd, self.wasd_rect)  # Draw WASD guide
+        self.screen.blit(self.wasd, self.wasd_rect) 
         Asset.img(self, "assets/pictures/arrow.png", 450, 650, self.screen)
-        for s in sprites:  # Draw all sprites
+        for s in sprites: 
             s.draw(self.screen)
     def run(self):
-        pygame.mixer.music.play(-1, 0, 5000)  # Play background music
+        pygame.mixer.music.play(-1, 0, 5000)  
         while self.running:
             self.player_rect = self.player.rect
             self.mouse_pos = pygame.mouse.get_pos()
             self.collision_detection()
-        # 1. Kigger efter events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-        
-        # 2. Tjekker for input
+
             self.player.update()
-        # 3. Draw everything
             self.draw()
            
-        
-        # 4. Update display once per frame
             pygame.display.flip()
             self.clock.tick(60)
 

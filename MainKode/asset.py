@@ -1,8 +1,5 @@
 import pygame
 
-### Path er billedepath som sting, x og y er placering af billedet, screen er display, og place er hvis du vil placerer det med det samme skriver du ingenting i place
-### og hvis du vil placere det senere så sætter du den til false når du kalder klassen
-# Når du kalder din asset i koden, skal du fastsætte skærmstørrelsen f.eks. asset = Asset(1280, 720), dette gør så du ikke skal skrive det ind hver gang
 class Asset:
     def __init__(self, width, height):
         self.screen = pygame.display.set_mode((width, height))
@@ -31,7 +28,6 @@ class Asset:
         else:
             pass
 
-    #Hvis man ønsker at placere det senere, når man kalder funktionen skal man ændre place til False
     def place(self):
         self.screen.blit(self.image, self.rect_img)
 

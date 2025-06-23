@@ -14,10 +14,9 @@ class Button():
             self.hovering_image = self.text
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
-        self.is_hovered = False  # Track hover state
+        self.is_hovered = False
 
     def update(self, screen):
-        # Draw the correct image based on hover state
         if self.is_hovered:
             screen.blit(self.hovering_image, self.rect)
         else:

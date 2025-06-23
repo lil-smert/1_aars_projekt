@@ -27,7 +27,6 @@ class Login:
         self.menu_font = self.get_font(45)
         pygame.display.set_icon(pygame.image.load("assets/pictures/window_icon.png"))
         self.font ="assets/font/menufont.otf"
-        # Konstante variabler, som ikke skal ændres
         self.login_success = False
         self.user_text1 = ''
         self.user_text2 = '' 
@@ -40,7 +39,7 @@ class Login:
         self.color1 = self.rect_color_pas
         self.color2 = self.rect_color_pas
     def login_auth(self):
-        if self.login_button.checkForInput(self.menu_mouse_pos): #Sender API-request til server
+        if self.login_button.checkForInput(self.menu_mouse_pos):
                     self.url = "https://cyberrila.com/api/login"
                     try:
                         self.response = requests.post(self.url, json={"username": self.user_text1, "password": self.user_text2}, allow_redirects=False)
@@ -50,9 +49,10 @@ class Login:
                         return
                     
                     if self.response.status_code == 200: 
-                        os.environ["USERNAME"] = self.user_text1 #Gemmer brugernavnet, så vi kan bruge det i andre klasser
+                        os.environ["USERNAME"] = self.user_text1 
                         self.login_success = True
                         self.login_snd.play()
+                        pygame.mixer.music.stop()
                         self.cred_error = False
                     else:
                         self.login_error_snd.play()
@@ -60,24 +60,17 @@ class Login:
                         
 
     def login_input(self):
-        # Draw username and password input fields
         self.username_rect = pygame.Rect(420, 210, 385, 70)
         self.password_rect = pygame.Rect(420, 405, 385, 70)
-
-        # Draw username input box
         pygame.draw.rect(self.screen, self.color1, self.username_rect, 5)
         text_surface1 = self.menu_font.render(self.user_text1, True, (255, 255, 255))
         self.screen.blit(text_surface1, (self.username_rect.x + 10, self.username_rect.y + 20))
         self.username_rect.w = max(400, text_surface1.get_width() + 10)
-
-        # Draw password input box
         self.password_font = pygame.font.Font("assets/font/password-dots.otf", 35)
         pygame.draw.rect(self.screen, self.color2, self.password_rect, 5)
         text_surface2 = self.password_font.render(self.user_text2, True, (255, 255, 255))
         self.screen.blit(text_surface2, (self.password_rect.x + 10, self.password_rect.y + 20))
         self.password_rect.w = max(400, text_surface2.get_width() + 10)
-
-        # Update colors based on active state
         self.color1 = self.rect_color_active if self.username_state else self.rect_color_pas
         self.color2 = self.rect_color_active if self.password_state else self.rect_color_pas
     def handle_events(self):
@@ -88,7 +81,6 @@ class Login:
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Check if username or password fields are clicked
                 self.username_state = self.username_rect.collidepoint(event.pos)
                 self.password_state = self.password_rect.collidepoint(event.pos)
 
@@ -101,13 +93,10 @@ class Login:
                         self.snd_btn.image = self.snd_off
                         pygame.mixer.music.pause()
                 
-
-                # Check if login button is clicked
                 if self.login_button.checkForInput(self.menu_mouse_pos):
                     self.login_auth()
 
             if event.type == pygame.KEYDOWN:
-                # Handle text input for username
                 if self.username_state:
                     if event.key == pygame.K_BACKSPACE:
                         self.user_text1 = self.user_text1[:-1]
@@ -118,7 +107,6 @@ class Login:
                     else:
                         self.user_text1 += event.unicode
 
-                # Handle text input for password
                 if self.password_state:
                     if event.key == pygame.K_BACKSPACE:
                         self.user_text2 = self.user_text2[:-1]
@@ -127,25 +115,20 @@ class Login:
                     else:
                         self.user_text2 += event.unicode
     def check_snd(self):
-        self.snd_btn.update(self.screen)  # Draw sound button
-        
-        # Check if sound is on or off
+        self.snd_btn.update(self.screen)
 
     def login_func(self):
-        # Draw login button
         self.screen.blit(self.login_button_hov, (430, 510))
         self.login_button = Button(image=self.login_btn_img, pos=(610, 570), text_input=None, font=self.get_font(75), base_color="#d7fcd4", hovering_color="White", hovering_image=None)
         self.login_button.changeColor(self.menu_mouse_pos)
         self.login_button.update(self.screen)
 
-        # Display error message if credentials are wrong
         if self.cred_error:
             wrong_font = pygame.font.Font("Font/Danskfont.ttf", 35)
             wrong_text = wrong_font.render("Wrong Credentials!", True, "Red")
             wrong_text_place = wrong_text.get_rect(center=(610, 680))
             self.screen.blit(wrong_text, wrong_text_place)
         
-
     def run(self):
         self.frame_index = 0
         self.frame_delay = 35
@@ -159,13 +142,13 @@ class Login:
             
 
             self.menu_mouse_pos = pygame.mouse.get_pos()
-            self.handle_events()         # Handle input/events
+            self.handle_events()        
 
-            self.login_input()           # Draw input fields and text
-            self.login_func()      
-            self.check_snd()     # Draw login button and error message
+            self.login_input()           
+            self.login_func()  
+            self.check_snd()     
 
-            pygame.display.flip()        # Update the display
+            pygame.display.flip()        
             self.clock.tick(60)
 
 

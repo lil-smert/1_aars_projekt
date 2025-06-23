@@ -4,8 +4,7 @@ from asset1 import Asset
 from GDPR_Hop import GDPRGame
 from ID1 import gamer
 from gameLogic2 import Gamer2
-from main import Game
-#Add lyd til baner
+from level_4 import Game
 
 
 class Levels:
@@ -26,7 +25,7 @@ class Levels:
                 if event.type == pygame.QUIT:
                     pygame.mixer.music.unload()
                     
-                    self.running = False  # Clear screen first
+                    self.running = False 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     pygame.mixer.music.unload()
                     self.running = False
@@ -50,7 +49,7 @@ class Levels:
         self.level_1_scene = 0
         self.screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Phishing Level")
-        self.screen.fill(self.clear_color)  # Clear screen first
+        self.screen.fill(self.clear_color)  
         self.phishing_img = pygame.image.load("assets/pictures/phishing.png")
         self.phishing_img_rect = self.phishing_img.get_rect(center=(640, 160))
         self.info_text_1 = self.font.render("Phishing er en type cyberangreb, hvor svindlere forsøger at narre dig til at", True, (255, 255, 255))
@@ -62,11 +61,11 @@ class Levels:
         self.phi_text_3 = self.font.render("ondsindede phishing-forsøg. Til venstre har du den korrekte mail, til højre", True, (255, 255, 255))
         self.phi_text_4 = self.font.render("er der phishing-mails. Din opgave er at udvælge den korrekte e-mail", True, (255,255,255)) # Play background music
         while self.running:
-            self.screen.fill(self.clear_color)  # Clear screen first
+            self.screen.fill(self.clear_color)  
             self.run_level()
             self.screen.blit(self.phishing_img, self.phishing_img_rect)
             self.screen.blit(self.press_space, (520, 650))
-            if self.level_1_scene == 0: # Clear screen first
+            if self.level_1_scene == 0: 
                 self.screen.blit(self.info_text_1, (40, 340))
                 self.screen.blit(self.info_text_2, (40, 400))
                 self.screen.blit(self.info_text_3, (40, 460))
@@ -98,7 +97,7 @@ class Levels:
         self.gdpr_text_8 = self.font.render("grebet en mail, får du et spørgsmål omkring GDPR, som du skal svare på.", True, (255, 255, 255))
         pygame.display.set_caption("GDPR Level")
         self.screen = pygame.display.set_mode((1280, 720))
-        self.screen.fill(self.clear_color)  # Clear screen first
+        self.screen.fill(self.clear_color) 
         while self.running:
             self.run_level()
             self.screen.fill(self.clear_color)
@@ -156,7 +155,7 @@ class Levels:
             if self.level_3_scene == 2:
                 self.level_3_game.run_game()
                 self.running = False
-                 #run game
+                
 
 
             pygame.display.flip()
@@ -198,6 +197,4 @@ class Levels:
             pygame.display.flip()
             self.clock.tick(60)
             
-            # exit button in minigame sets running False
-           
 

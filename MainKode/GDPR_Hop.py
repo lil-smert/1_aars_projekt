@@ -3,7 +3,7 @@ from sys import exit
 from random import randint, choice
 import textwrap
 from complete import complete
-from button import Button
+
 
 class GDPRGame:
     def __init__(self):
@@ -19,49 +19,50 @@ class GDPRGame:
         self.show_quiz = False
         self.winner_screen = False
         self.score = 0
+        self.lives = 3
 
-        self.user_text1 = "cleared"  # Du kan ændre denne værdi hvis du vil bruge brugerinput
+        self.user_text1 = "cleared"
 
         self.all_questions = [
-            {"question": "Hvilken ret har du IKKE ifølge GDPR?", 
-             "options": ["A: Ret til indsigt", "B: Økonomisk kompensation", "C: Ret til sletning"], 
+            {"question": "Du har adgang til mange borgere i systemet. Må du kigge, hvis du er nysgerrig?", 
+             "options": ["A: Ja", "B: Nej, kun hvis det er nødvendigt for dit arbejde", "C: Måske"], 
+             "correct": "B"
+            },
+            {"question": "En borger vil vide, hvorfor I behandler hendes oplysninger. Hvad svarer du?", 
+             "options": ["A: Det bestemmer kommunen bare selv", "B: Det må du ikke fortælle", "C: Du oplyser formålet klart – det har hun ret til"], 
              "correct": "C"
             },
-            {"question": "Hvornår må en virksomhed behandle dine data?", 
-             "options": ["A: Når de vurderer det nødvendigt", "B: Gyldigt behandlingsgrundlag", "C: Når data ikke er følsomme"], 
+            {"question": "Du får en e-mail med persondata ved en fejl. Hvad gør du?", 
+             "options": ["A: Du videresender den hurtigt", "B: Du kontakter den ansvarlige og anmelder det", "C: Du ignorerer det"], 
              "correct": "B"
             },
-            {"question": "Hvad er et krav for gyldigt samtykke?", 
-             "options": ["A: Skal være skriftligt", "B: Skal være frivilligt, informeret", "C: Må gives stiltiende"], 
-             "correct": "B"
-            },
-            {"question": "Hvornår skal der udpeges en DPO?", 
-             "options": ["A: Hvis virksomheden har 10 ansatte", "B: Når der overvåges stort omfang", "C: Hvis virksomheden bruger sociale medier"], 
-             "correct": "B"
-            },
-            {"question": "Hvornår skal databrud anmeldes?", 
-             "options": ["A: Inden for 7 dage", "B: Kun hvis medierne skriver om det", "C: Inden for 72 timer, medmindre risikoen er lav"], 
+            {"question": "Hvem i Frederiksberg Kommune skal man kontakte, hvis man har spørgsmål om databeskyttelse?", 
+             "options": ["A: Borgerservice", "B: HR-afdeling", "C: Kommunens DPO (databeskyttelsesrådgiver)"], 
              "correct": "C"
             },
-            {"question": "Hvad betyder dataminimering?", 
-             "options": ["A: Ikke gemme data", "B: Kun data der er nødvendige", "C: Skjule data i alle tilfælde"], 
+            {"question": "Du er i praktik i Frederiksberg Kommune og hører om en datalæk. Hvad gør du?", 
+             "options": ["A: Du siger det ikke til nogen", "B: Du rapporterer det til din leder eller DPO", "C: Du poster det på LinkedIn"], 
+             "correct": "B"
+            },
+            {"question": "En ny kollega i din afdeling spørger, om han må bruge dit login. Hvad siger du?", 
+             "options": ["A: Ja, det er jo bare midlertidigt", "B:  Nej, man må aldrig dele login", "C: Kun hvis han lover ikke at ændre noget"], 
              "correct": "B"
             },
             {"question": "Hvilken data er følsom?", 
              "options": ["A: Navn og adresse", "B: CPR-nummer", "C: Ens religion"], 
              "correct": "C"
             },
-            {"question": "Hvad er GDPR's formål?", 
-             "options": ["A: At beskytte data uden samtykke", "B: Beskytte rettigheder i forhold til databeskyttelse", "C: At fremme statslig overvågning"], 
-             "correct": "B"
+            {"question": "Du modtager en USB-nøgle med borgerdata. Hvordan håndterer du den?", 
+             "options": ["A: Lader den ligge på skrivebordet", "B: Gemmer den i din jakkelomme", "C: Afleverer den til IT"], 
+             "correct": "C"
             },
             {"question": "Hvem er dataansvarlig?", 
              "options": ["A: Økonomimedarbejder", "B: Personen hvis data behandles", "C: Den der bestemmer hvordan data behandles"], 
              "correct": "C"
             },
-            {"question": "Hvad sker der hvis samtykke trækkes tilbage?", 
-             "options": ["A: Ignoreres hvis data er brugt", "B: Behandling stoppes, medmindre anden lovlig grund", "C: Personen får bøde"], 
-             "correct": "B"
+            {"question": "Skal du låse din skærm, når du forlader skrivebordet?", 
+             "options": ["A: Ja", "B: Nej", "C: Kun hvis der er følsomme data åbne"], 
+             "correct": "A"
             }
         ]
 
@@ -71,6 +72,7 @@ class GDPRGame:
         self.quiz_start_time = 0
 
         self.bg_music = pygame.mixer.Sound("Audio/game-music-loop.mp3")
+        self.bg_music.play(-1)
         self.bg_music.set_volume(0.5)
         self.jump_sound = pygame.mixer.Sound("Audio/Jump10.wav")
         self.jump_sound.set_volume(0.5)
@@ -114,7 +116,7 @@ class GDPRGame:
         self.player_stand_rect = self.player_stand.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
         self.game_name = self.font.render("GDPR Hop", False, (111, 196, 169))
         self.game_name_rect = self.game_name.get_rect(center=(self.screen_width // 2, 80))
-        self.game_message = self.font.render("Tryk SPACE for at starte igen", False, (111, 196, 169))
+        self.game_message = self.font.render("Tryk Enter for at starte igen", False, (111, 196, 169))
         self.game_message_rect = self.game_message.get_rect(center=(self.screen_width // 2, self.screen_height - 100))
         self.main_menu = self.font.render("Tryk ESCAPE for Hovedmenu", False, (111, 196, 169))
         self.main_menu_rect = self.main_menu.get_rect(center=(self.screen_width // 2, self.screen_height - 50))
@@ -125,9 +127,7 @@ class GDPRGame:
         pygame.time.set_timer(self.snail_timer, 500)
         self.fly_timer = pygame.USEREVENT + 3
         pygame.time.set_timer(self.fly_timer, 200)
-        # flag to control game loop termination
         self.running = True
-    
 
     def obstacle_movement(self, obstacle_list):
         new_list = []
@@ -173,7 +173,7 @@ class GDPRGame:
             self.screen.blit(option_text, (margin, margin + (len(wrapped_question) + i) * 40))
 
         time_elapsed = (pygame.time.get_ticks() - self.quiz_start_time) // 1000
-        time_left = max(0, 10 - time_elapsed)
+        time_left = max(0, 15 - time_elapsed)
         timer_text = self.font.render(f"Tid: {time_left}", False, (255, 100, 100))
         self.screen.blit(timer_text, (self.screen_width - 250, 30))
 
@@ -186,12 +186,9 @@ class GDPRGame:
             self.game_active = False
 
     def game_run(self):
-        self.bg_music.play(-1)
-        # use running flag to allow ESC to exit
-        self.running = True
+        self.game_active = True
         while self.running:
             for event in pygame.event.get():
-                # quit or escape: stop loop
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
@@ -199,7 +196,7 @@ class GDPRGame:
                     self.bg_music.stop()
                     self.running = False
                     break
-                
+
                 if self.show_quiz:
                     if event.type == pygame.KEYDOWN:
                         key = event.unicode.upper()
@@ -209,25 +206,31 @@ class GDPRGame:
                                 self.correct_sound.play()
                                 self.show_quiz = False
                                 self.current_question = None
-                                if self.score >= 1:
+                                if self.score >= 3:
                                     complete.level_2_complete = True
                                     self.winner_screen = True
                                     self.game_active = False
                             else:
                                 self.fail_sound.play()
-                                self.score = 0
+                                self.lives -= 1
                                 self.obstacle_rect_list.clear()
                                 self.show_quiz = False
                                 self.current_question = None
-                                self.game_active = False
-                    continue
-
+                                if self.lives == 0:
+                                    self.game_active = False
+                    continue  
                 if self.game_active:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
                             self.bg_music.stop()
                             self.running = False
                         elif event.key == pygame.K_SPACE and self.player_rect.bottom >= self.screen_height - 100:
+                            self.player_gravity = -20
+                            self.jump_sound.play()
+                
+                if self.game_active:
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE and self.player_rect.bottom >= self.screen_height - 100:
                             self.player_gravity = -20
                             self.jump_sound.play()
 
@@ -246,14 +249,12 @@ class GDPRGame:
                         self.fly_surf = self.fly_frame[self.fly_index]
 
                 else:
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         self.game_active = True
                         self.score = 0
+                        self.lives = 3
                         self.obstacle_rect_list.clear()
                         self.winner_screen = False
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                        self.bg_music.stop()
-                        self.running = False
 
             if self.show_quiz:
                 self.display_quiz()
@@ -280,16 +281,21 @@ class GDPRGame:
                             break
                         else:
                             self.fail_sound.play()
-                            self.game_active = False
+                            self.lives -= 1
+                            self.obstacle_rect_list.clear()
+                            if self.lives == 0:
+                                self.game_active = False
 
                 score_display = self.font.render(f"Score: {self.score}", False, (255, 255, 255))
                 self.screen.blit(score_display, (20, 20))
+
+                lives_display = self.font.render(f"Liv: {self.lives}", False, (255, 255, 255))
+                self.screen.blit(lives_display, (20, 60))
 
             else:
                 self.screen.fill((91, 129, 162))
                 self.screen.blit(self.player_stand, self.player_stand_rect)
                 if self.winner_screen:
-                    complete.level_2_complete = True
                     win_text = self.font.render("Tillykke! Du har vundet!", False, (255, 255, 0))
                     self.screen.blit(win_text, win_text.get_rect(center=(self.screen_width // 2, 100)))
                 else:
@@ -305,4 +311,4 @@ class GDPRGame:
 
 if __name__ == "__main__":
     game = GDPRGame()
-    game.run()
+    game.game_run()

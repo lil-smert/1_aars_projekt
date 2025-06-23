@@ -22,11 +22,9 @@ class Gamer2:
                               "assets/sus.png", "assets/walter.png", "assets/smile.png", "assets/demon.png", 
                               "assets/smirk.png", "assets/butter.png"] #paths her
         self.game_state = "start"
-        #timer atributter
         self.timer_start = pygame.time.get_ticks()
         self.countdown_secs = 10
-        #sounds
-        ###self.correct_sound = pygame.mixer.Sound()
+
         self.incorrect_sound = pygame.mixer.Sound("sounds/wrong.mp3")
         self.correct_sound = pygame.mixer.Sound("sounds/right.mp3")
         self.decision_made = False
@@ -34,7 +32,7 @@ class Gamer2:
         self.hired_button = None
         self.fired_button = None
         self.target_x = None
-        self.img_speed = 3  #Pixels pr frame
+        self.img_speed = 3  
         self.img = None
         self.rect_img = None
         self.chosen_pass = None
@@ -43,12 +41,9 @@ class Gamer2:
         self.fired_button_surface = pygame.Surface(self.button_size)
         self.pass_surface = pygame.Surface(self.button_size)
         self.button_width, self.button_height = self.button_size
-        #beslutnings-counters
         self.correct_decisions = 0
         self.incorrect_decisions = 0
-        #hp img
         self.hearts = pygame.image.load("assets/hp.png")
-        #end screen buttons
         self.retry_button = Button(None, 
                               pos=(self.SCREEN_WIDTH // 2, self.SCREEN_HEIGHT // 2.3), 
                               text_input="Retry", 
@@ -101,9 +96,6 @@ class Gamer2:
     ]
 
 
-
-
-    #img setup
     def img_setup(self):
         self.img = pygame.image.load(random.choice(self.characterList))
         self.img = pygame.transform.scale(self.img, (350, 500))
@@ -111,8 +103,6 @@ class Gamer2:
         self.rect_img = self.img.get_rect(center=(1280 + 20, self.SCREEN_HEIGHT - (img_height // 2)))
 
 
-
-    #bevægelse af imgs afhængigt af game bruger beslutninger
     def update_direction(self):
         if self.img is None:
             return
@@ -140,7 +130,7 @@ class Gamer2:
 
 
 
-    #timer and 
+
     def draw_timer_and_score(self):
         elapsed_time = (pygame.time.get_ticks() - self.timer_start) // 1000
         remaining_time = max(0, self.countdown_secs - elapsed_time)
@@ -148,14 +138,12 @@ class Gamer2:
 
         box_width = 100
         box_height = 90
-        #TIMER PLACERING
         border_rect = pygame.Rect(255, 20, box_width, box_height)
         pygame.draw.rect(self.screen, (0, 0, 0), border_rect)
 
         inner_rect = border_rect.inflate(-15, -15)
         pygame.draw.rect(self.screen, (255, 255, 255), inner_rect)
 
-        # farve afhængigt af remaining time
         text_color = (255, 0, 0) if remaining_time < 4 else (0, 0, 0)
         text_surface = self.font.render(self.countDown, True, text_color)
         text_rect = text_surface.get_rect(center=inner_rect.center)
@@ -173,7 +161,6 @@ class Gamer2:
 
         for i in range(10):
             score_text = self.font.render(f"{self.correct_decisions} / 10", True, (0, 0, 0))
-            #SCORE PLACERING
             score_border_rect = pygame.Rect(400, 20, 160, 90)
 
             inner_score_rect = score_border_rect.inflate(-15, -15)
@@ -184,8 +171,6 @@ class Gamer2:
             self.screen.blit(score_text, score_rect)
 
 
-
-    #hired fired knap setup
     def hired_fired_setup(self):
         self.fired_button_surface.fill((236, 187, 119))
         self.hired_button_surface.fill((236, 187, 119))
@@ -195,9 +180,9 @@ class Gamer2:
             pos=(150, 530),  
             text_input="Hired!",
             font=self.font,
-            base_color=(0, 0, 0),      # sort tekst normalt
+            base_color=(0, 0, 0),     
             hovering_color=(255, 255, 255),
-            hovering_image=None      # gul tekst ved hover
+            hovering_image=None     
         )
 
         self.fired_button = Button(
@@ -205,9 +190,9 @@ class Gamer2:
             pos=(430, 530),  
             text_input="Fired!",
             font=self.font,
-            base_color=(0, 0, 0),      # sort tekst normalt
+            base_color=(0, 0, 0),   
             hovering_color=(255, 255, 255),
-            hovering_image=None         # gul tekst ved hover
+            hovering_image=None         
         )
 
        
@@ -218,28 +203,26 @@ class Gamer2:
     def draw_hired_fired_buttons(self):
         border_size = (self.button_width + 15, self.button_height + 15)
         
-        #correct buttons størrelse og baggrundsfarve
+   
         self.hired_button_surface = pygame.Surface((200, 60))
         self.hired_button_surface.fill((255, 255, 255))
-        #incorrect buttons størrelse og baggrundsfarve
+
         self.fired_button_surface = pygame.Surface((200, 60))
         self.fired_button_surface.fill((255, 255, 255))
 
 
 
-        #border setup, 20px større end button surface
         self.hired_border_surface = pygame.Surface(border_size)
         self.hired_border_surface.fill((0, 0, 0))
         self.fired_border_surface = pygame.Surface(border_size)
         self.fired_border_surface.fill((0, 0, 0))
 
         
-        #get rects for borders 
+       
         self.hired_border_rect = self.hired_border_surface.get_rect(center=self.hired_button.rect.center)
         self.fired_border_rect = self.fired_border_surface.get_rect(center=self.fired_button.rect.center)
        
 
-        #draw buttons with borders to the screen
         self.screen.blit(self.hired_border_surface, self.hired_border_rect)
         self.screen.blit(self.fired_border_surface, self.fired_border_rect)
         self.hired_button.update(self.screen)
@@ -247,25 +230,21 @@ class Gamer2:
 
 
 
-        ########################################### PASSWORD TO CHECK ##############################################
 
     def pass_setup(self):
         all_pass = self.good_passwords + self.bad_passwords
         self.chosen_pass = random.choice(all_pass)
 
-        # Render teksten midlertidigt for at måle størrelse
         temp_surface = self.font.render(self.chosen_pass, True, (0, 0, 0))
         text_width, text_height = temp_surface.get_size()
 
-        # Opret border og button surface baseret på tekststørrelse
         self.border_surface = pygame.Surface((text_width + 35, text_height + 35))
-        self.border_surface.fill((0, 0, 0))  # sort border
+        self.border_surface.fill((0, 0, 0))  
 
         self.pass_surface = pygame.Surface((text_width + 20, text_height + 20))
-        self.pass_surface.fill((255, 255, 255))  # hvid baggrund
+        self.pass_surface.fill((255, 255, 255)) 
 
         button_width = self.pass_surface.get_width()
-        # Opret knappen (pos er hardcoded et andet sted, som du nævner)
         self.password_button = Button(
             image=self.pass_surface,
             pos=(self.SCREEN_WIDTH - ((button_width + 50) // 2), text_height + 5),  
@@ -277,14 +256,10 @@ class Gamer2:
         )
 
     def draw_password(self):
-        # Brug button rect til at placere border bagved
         border_rect = self.border_surface.get_rect(center=self.password_button.rect.center)
         self.screen.blit(self.border_surface, border_rect)
-
-        # Tegn knap
         self.password_button.update(self.screen)
 
-########################################## Decisions ###############################################
     def hired_decision(self):
         self.game_state = "correct"
         self.update_direction()
@@ -295,7 +270,7 @@ class Gamer2:
         self.update_direction()
         self.timer_start = pygame.time.get_ticks()
     
-##########################################END SCREENS###########################################
+
     def end_screen(self, background, message, buttons):
         self.screen.blit(background, (0, 0))
         menu_text = self.font.render(message, True, (255, 255, 255))
@@ -312,7 +287,7 @@ class Gamer2:
             self.game_state = "timeLoss"
         elif self.incorrect_decisions == 3:
             self.game_state =  "guessLoss"
-        elif self.correct_decisions == 1:
+        elif self.correct_decisions == 3:
             self.game_state = "win"
 
     def draw_screens(self):
@@ -364,7 +339,7 @@ class Gamer2:
                         self.correct_decisions = 0
                         self.incorrect_decisions = 0
                         self.timer_start = pygame.time.get_ticks()
-                        self.setup()  # resets for a new round
+                        self.setup() 
                 elif self.main_menu_button.checkForInput(mouse_pos):
                     self.background_music.stop()
                     self.running = False
@@ -393,11 +368,8 @@ class Gamer2:
         self.setup()
         self.background_music.play(-1)
         while self.running:
-            #mouse events og fetch mouse pos fra funktions return
             mouse_pos = self.handle_events()
             pygame.display.update()
-
-
 
 if __name__ == "__main__":
     game2 = Gamer2()

@@ -40,8 +40,6 @@ class gamer:
         self.countdown_secs = 8
         self.countDown = None
         
-
-        #imgs
         self.hearts = pygame.image.load("imgs/hp.png")
 
         self.background = pygame.transform.scale(pygame.image.load("imgs/phishingBackground.png"), 
@@ -290,7 +288,7 @@ class gamer:
                         if result is True:
                             pygame.time.delay(500)
                             self.setup_round()
-                            if self.correct_guesses >= 1:
+                            if self.correct_guesses >= 3:
                                 complete.level_1_complete = True
                                 pygame.mixer.music.stop()
                                 game_state = "win"

@@ -11,10 +11,10 @@ class Sprite:
         self.x = x
         self.y = y
         sprites.append(self)
-        self.animation_frames = []      # list of Surfaces
-        self.animation_index = 0        # current frame index
-        self.animation_last = 0         # last time we advanced
-        self.animation_delay = 0        # ms between frames
+        self.animation_frames = []      
+        self.animation_index = 0       
+        self.animation_last = 0       
+        self.animation_delay = 0        
         self.animated = False
 
     def set_animation(self, frame_paths, delay=100):

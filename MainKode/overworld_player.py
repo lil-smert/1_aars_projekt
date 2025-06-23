@@ -2,8 +2,8 @@ import pygame
 from overworld_sprite import Sprite
 
 class Player(Sprite):
-    def __init__(self, image_path, x, y): #Image_path er den vi selv vælger i overworld filen, og x og y er de led hvor spriten bevæger sig
-        super().__init__(image_path, x, y) #Super kalder den overordnede klasse, som er sprite klassen, og kalder dens init funktion  #For collision detection, så der er en box omkring spriten
+    def __init__(self, image_path, x, y):
+        super().__init__(image_path, x, y) 
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.movement_speed = 2
@@ -14,7 +14,7 @@ class Player(Sprite):
         self.old_x = self.x
         self.old_y = self.y
         self.set_animation([f"assets/pictures/sprites/player/player_{i}.png" for i in range(0, 2)], delay=350)
-        self.new_animation = "idle"  # Used to track the current animation state
+        self.new_animation = "idle" 
    
 
     def update(self):
@@ -26,8 +26,7 @@ class Player(Sprite):
             if not self.new_animation == "idle":
                 self.set_animation([f"assets/pictures/sprites/player/player_{i}.png" for i in range(0, 2)], delay=350)
                 self.new_animation = "idle"
-        
-        # If movement starts, play the footstep sound on loop; if stops, stop it.
+
         if moving and not self.moving:
             self.channel.play(self.step_snd, loops=-1)
             self.moving = True
