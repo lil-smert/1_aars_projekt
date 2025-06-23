@@ -11,16 +11,13 @@ import os
 from datetime import datetime
 
 auth = Blueprint('auth', __name__)
-#TING SOM SKAL ADDES: lave dashboard flot, favicon, login confirmation alert, send e-mail knap til dashboard, sudo + chmod ~/.bashrc, klokkeslæt
 DB_PATH = 'Hjemmeside/Database/credentials.db'
 
-#Liste over godkendte firmaer
 AUTHORIZED_COMPANIES = {
     "KEA",
     "Frederiksberg Kommune",
     "Gooner Games Inc",
 }
-#Key er på forhånd genereret, og stored i OS - for at opnå adgang til os skal man være logget ind som sudo, derfor skal man nu køre hjemmesiden som SUDO, brugte chmod
 load_dotenv() 
 key = os.getenv("FERNET_KEY")
 fernet = Fernet(key)
@@ -89,7 +86,6 @@ def samlet_statistik():
     return data
 
 def bruger_statistik():
-    # Sammenligner username fra game_data med credentials, indsnævrer efter brugerens firma
     company = session.get('user_company')
     sql = '''
     SELECT game_data.username, credentials.FIRSTNAME, credentials.LASTNAME,
@@ -207,7 +203,7 @@ def logout():
     session.pop('user_company', None)
     return redirect(url_for('routes.home'))
 
-@auth.route('/api/login', methods=['POST']) #Skal læses op på, men det er en API i JSON, spillet sender et POST request til URL'en, i JSON format
+@auth.route('/api/login', methods=['POST'])
 def api_login():
     data = request.get_json()
     if not data or 'username' not in data or 'password' not in data:
@@ -224,8 +220,8 @@ def api_login():
     db.close()
     
 
-    #Tjek at brugeren findes og at passwordet er korrekt, fra hash
-    if user and check_password_hash(user['PASSWORD'], pw): #Tjekker om
+    
+    if user and check_password_hash(user['PASSWORD'], pw): 
         return jsonify({"status": "success", "username": user['USERNAME']})
       
     return jsonify({"status": "error", "message": "Invalid username or password."}), 401
@@ -249,7 +245,7 @@ def receive_data():
 
 @auth.route('/api/get_data', methods=['GET'])
 def send_data():
-    username = request.args.get('username') #modtager brugernavn
+    username = request.args.get('username')
     db = get_db()
     data = db.execute("SELECT LEVEL1, LEVEL2, LEVEL3, LEVEL4 FROM GAME_DATA WHERE USERNAME = ?", (username,)).fetchone()
     db.close()
