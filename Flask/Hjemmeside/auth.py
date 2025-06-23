@@ -61,18 +61,16 @@ def samlet_statistik():
     users_completed = 0
     print(rows)
     
-    # Laver dem om til lister
     users   = [r["USERNAME"] for r in rows]
     lvl1    = [r["LEVEL1"]   for r in rows]
     lvl2    = [r["LEVEL2"]   for r in rows]
     lvl3    = [r["LEVEL3"]   for r in rows]
     lvl4    = [r["LEVEL4"]   for r in rows]
-   #matematikken bag procent
+   
     for r in rows:
         if sum([r["LEVEL1"], r["LEVEL2"], r["LEVEL3"], r["LEVEL4"]]) == 4:
             users_completed +=1
 
-    #Tjekker hvor mange rows der er = brugere
     total_possible = len(rows) 
     total_not_done = total_possible - users_completed
 
@@ -89,6 +87,7 @@ def samlet_statistik():
     fig.savefig(buf, format="png", bbox_inches="tight")
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     return data
+
 def bruger_statistik():
     # Sammenligner username fra game_data med credentials, indsnævrer efter brugerens firma
     company = session.get('user_company')
@@ -137,15 +136,12 @@ def register():
         username = request.form['username'].strip()
         password = request.form['password']
 
-        
-        #Hvis firmaet ikke er i listen over godkendte firmaer
         if company not in AUTHORIZED_COMPANIES:
             flash('Sorry, "%s" is not authorized to register for our services.' % company)
             return redirect(url_for('auth.register'))
 
         db = get_db()
 
-        #Tjek at username er unikt
         if db.execute(
             "SELECT 1 FROM CREDENTIALS WHERE USERNAME = ?",
             (username,)
@@ -154,8 +150,6 @@ def register():
             db.close()
             return redirect(url_for('auth.register'))
 
-
-        #Kryptering
         encoded_email = email.encode()
         encoded_fornavn = firstname.encode()
         encoded_efternavn = lastname.encode()
@@ -163,9 +157,9 @@ def register():
         encrypted_fornavn = fernet.encrypt(encoded_fornavn)
         encrypted_efternavn = fernet.encrypt(encoded_efternavn)
         encrypted_email = fernet.encrypt(encoded_email)
-        #Hashing
+    
         hashed_password = generate_password_hash(password)
-        
+    
         try:
             db.execute(
                 'INSERT INTO CREDENTIALS '
@@ -187,22 +181,16 @@ def register():
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        
         username = request.form['username'].strip()
         pw = request.form['password']
-
-
         db = get_db()
-        
         user = db.execute(
             "SELECT EMAIL, PASSWORD, COMPANY, ADMIN FROM CREDENTIALS WHERE USERNAME = ?",
             (username,)
         ).fetchone()
         db.close()
-        #Tjek at brugeren findes og at passwordet er korrekt, fra hash
         session_company = user['COMPANY']
         session_admin = user['ADMIN']
-        
         if user and check_password_hash(user['PASSWORD'], pw):
             session['user_email'] = user['EMAIL']
             session['user_company'] = user['COMPANY'] 
