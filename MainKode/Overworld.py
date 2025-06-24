@@ -96,12 +96,6 @@ class Overworld:
     def collision_detection(self):
         self.levels = Levels()
         keys = self.player.get_keys()
-        if keys[pygame.K_SPACE] and self.end == True:
-            self.end = False
-            complete.level_1_complete = True
-            pygame.mixer.music.unload()
-            pygame.mixer.music.load("assets/music/overworld.mp3")
-            pygame.mixer.music.play(-1)
         if self.level_1_col.colliderect(self.player.rect):
             self.level_1_collision = True
             if keys[pygame.K_SPACE]:
